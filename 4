@@ -1,0 +1,57 @@
+import pandas as pd
+
+# Load CSV file
+
+csv_file_path = "Desktop/iris.csv"
+
+df_csv = pd.read_csv(csv_file_path)
+
+# Load Excel file
+
+excel_file_path = "Desktop/iris.xlsx"
+
+df_excel = pd.read_excel(excel_file_path)
+
+# Explore CSV file
+
+print("Exploring CSV file:")
+
+print("Dataset information:")
+
+print(df_csv.info())
+
+print("\nFirst few rows of the dataset:")
+
+print(df_csv.head())
+
+print("\nSummary statistics:")
+
+print(df_csv.describe())
+
+print("\nUnique values for categorical columns:")
+
+for column in df_csv.select_dtypes(include='object').columns:
+
+ print(f"{column}: {df_csv[column].unique()}")
+
+# Explore Excel file
+
+print("\nExploring Excel file:")
+
+print("Dataset information:")
+
+print(df_excel.info())
+
+print("\nFirst few rows of the dataset:")
+
+print(df_excel.head())
+
+print("\nSummary statistics:")
+
+print(df_excel.describe())
+
+print("\nUnique values for categorical columns:")
+
+for column in df_excel.select_dtypes(include='object').columns:
+
+ print(f"{column}: {df_excel[column].unique()}")
