@@ -1,0 +1,163 @@
+CreateanapplicationtosendSMSandreceiveSMS
+Steps:
+1. ClickStart-AndroidStudio,aWelcometoAndroidStudiodialogboxwillappear.
+Click New Project, the New Project Dialog box appears.
+2. ChooseEmptyViewsActivitythenclickNext.
+3. SpecifytheNameofyourproject,SelecttheLanguageasJava,andSelectthe
+SDKasAPI24(“Nougat”,Android7.0).ClickFinishButton.
+4. Updatethefollowingcodeinactivity_main.xmlandMainActivity.java
+5. Click Runapporshift+F10toexecutethe application.
+activity_main.xml
+<?xmlversion="1.0"encoding="utf-8"?>
+<RelativeLayoutxmlns:android="http://schemas.android.com/apk/res/
+android"xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"android:layout_height="match_p
+arent"android:background="@color/white"
+tools:context=".MainActivity">
+<EditText
+android:id="@+id/editTextPhoneNumber"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:hint="Enter phone number"
+android:layout_margin="16dp"/>
+<EditText
+android:id="@+id/editTextMessage"
+android:layout_width="match_parent
+"
+android:layout_height="wrap_content
+" android:hint="Enter message"
+android:layout_below="@id/editTextPhoneNumber"
+android:layout_margin="16dp"/>
+<Button
+android:id="@+id/buttonSend"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Send"
+android:layout_below="@id/editTextMessage" 
+android:layout_alignParentEnd="true"
+android:layout_marginEnd="16dp"
+android:onClick="sendMessage"tools:ignore="UsingOnClickInXml"/>
+<TextView
+android:id="@+id/textViewReceivedMessag
+es" android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_below="@id/buttonSend"
+android:layout_marginStart="16dp"
+android:layout_marginTop="16dp"
+android:layout_marginEnd="16dp"
+android:layout_marginBottom="16dp"
+android:textColor="@color/black" />
+</RelativeLayout>
+MainActivity.java
+packagecom.bca.sms;
+importandroidx.appcompat.app.AppCompatActi
+vity; import androidx.core.app.ActivityCompat;
+importandroidx.core.content.ContextCom
+pat; import
+android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+importandroid.content.IntentFilt
+er;
+importandroid.content.pm.PackageMana
+ger; import android.os.Bundle;
+importandroid.telephony.SmsMana
+ger;
+importandroid.telephony.SmsMess
+age; import android.view.View;
+import
+android.widget.EditText;
+importandroid.widget.TextVie
+w; import
+android.widget.Toast; import
+android.Manifest;
+importandroidx.appcompat.app.AppCompatActivity;
+publicclassMainActivityextendsAppCompatActivity
+{
+privatestaticfinalint SMS_PERMISSION_CODE=101;
+private EditText editTextPhoneNumber;
+privateEditText editTextMessage;
+privateTextViewtextViewReceivedMessages;
+@Override
+protectedvoidonCreate(BundlesavedInstanceState)
+{
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+editTextPhoneNumber = findViewById(R.id.editTextPhoneNumber);
+editTextMessage = findViewById(R.id.editTextMessage);
+textViewReceivedMessages=findViewById(R.id.textViewReceivedMessages);
+//RequestSMSpermissionsifnotgranted
+if(!checkSMSPermission())
+{
+requestSMSPermission();
+}
+//RegisterSMSreceiver
+IntentFilter intentFilter = new IntentFilter();
+intentFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
+registerReceiver(smsReceiver, intentFilter);
+}
+@Override
+protectedvoidonDestroy()
+{
+super.onDestroy();
+unregisterReceiver(smsReceive
+r);
+}
+//Buttonclicklistener forsendingSMS
+publicvoidsendMessage(Viewview){StringphoneNumber=
+editTextPhoneNumber.getText().toString().trim();
+Stringmessage=editTextMessage.getText().toStrin
+g(); if (phoneNumber.isEmpty())
+{
+Toast.makeText(this,"Pleaseenteravalidphonenumber",
+Toast.LENGTH_SHORT).show();
+return;
+}
+try{
+SmsManager smsManager = SmsManager.getDefault();
+smsManager.sendTextMessage(phoneNumber,null,message,null,null);
+Toast.makeText(this, "Message sent", Toast.LENGTH_SHORT).show();
+}
+catch(IllegalArgumentExceptione)
+{
+Toast.makeText(this,"Invalidphonenumberformat",
+Toast.LENGTH_SHORT).show();
+}catch(Exceptione){
+Toast.makeText(this,"Failedtosendmessage",Toast.LENGTH_SHORT).show();
+e.printStackTrace();
+}
+}
+// Check if SMS permission is granted
+privatebooleancheckSMSPermission()
+{
+returnContextCompat.checkSelfPermission(this,Manifest.permission.SEND_SMS)
+== PackageManager.PERMISSION_GRANTED;
+}
+//RequestSMSpermission
+privatevoidrequestSMSPermission(){ActivityCompat.requestPermissions(this,new
+String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_CODE);
+}
+// SMSreceiver
+privatefinalBroadcastReceiversmsReceiver=newBroadcastReceiver()
+{@Override
+publicvoidonReceive(Contextcontext,Intentintent){Bundlebundle=intent.getExtras();
+if (bundle != null)
+{
+Object[]pdus=(Object[])bundle.get("pdus");
+if (pdus != null) {
+for(Objectpdu :pdus)
+{
+SmsMessage smsMessage = SmsMessage.createFromPdu((byte[])
+pdu);
+StringsenderPhoneNumber=smsMessage.getDisplayOriginatingAddre
+ss();
+String messageBody = smsMessage.getMessageBody();
+textViewReceivedMessages.append("From:"+senderPhoneNumber+"\n");
+textViewReceivedMessages.append("Message: " +
+messageBody+"\n\n");
+}
+}
+}
+}
+};
+}
